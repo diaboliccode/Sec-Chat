@@ -303,7 +303,7 @@ export default function MessageBubble({
                 </video>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg p-6 flex items-center justify-center border">
+              <div className="bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg overflow-hidden shadow-lg border">
                 <Video className="w-16 h-16 text-primary opacity-50" />
               </div>
             )}
@@ -321,186 +321,188 @@ export default function MessageBubble({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.3 }}
-      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group relative`}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-    >
-      <div className={`max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
-        {isFirstInGroup && !isOwn && contact && (
-          <div className="flex items-center gap-2 mb-2 px-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-sm shadow-lg">
-              {contact.avatar}
-            </div>
-            <span className="text-xs font-bold text-muted-foreground">
-              {contact.username}
-            </span>
-          </div>
-        )}
-
-        <div
-          className={`relative rounded-2xl px-4 py-3 shadow-lg border backdrop-blur-sm ${
-            isOwn
-              ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md border-primary/20'
-              : 'bg-gradient-to-br from-card to-card/80 border-border/50 rounded-bl-md'
-          } ${isFirstInGroup ? (isOwn ? 'rounded-tr-2xl' : 'rounded-tl-2xl') : ''}`}
-        >
-          {renderMessageContent()}
-
-          {/* Message Reactions - Fixed to show emoji + count properly */}
-          {message.reactions && message.reactions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {message.reactions.map((reaction, index) => (
-                <motion.button
-                  key={`${reaction.emoji}-${index}`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                    reaction.users && reaction.users.includes(user.id)
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
-                  }`}
-                  onClick={() => handleReaction(reaction.emoji)}
-                >
-                  <span className="text-sm leading-none">{reaction.emoji}</span>
-                  <span className="text-xs font-bold leading-none">{reaction.count || 1}</span>
-                </motion.button>
-              ))}
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        transition={{ duration: 0.3 }}
+        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group relative`}
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
+      >
+        <div className={`max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
+          {isFirstInGroup && !isOwn && contact && (
+            <div className="flex items-center gap-2 mb-2 px-3">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-sm shadow-lg">
+                {contact.avatar}
+              </div>
+              <span className="text-xs font-bold text-muted-foreground">
+                {contact.username}
+              </span>
             </div>
           )}
 
-          <div className={`flex items-center justify-between mt-2 gap-2 text-xs opacity-70`}>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{formatTime(message.timestamp)}</span>
-              {message.isEdited && (
-                <span className="text-muted-foreground">(edited)</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {timeLeft !== null && (
-                <span className="text-destructive font-bold">
-                  Deletes in {timeLeft}s
-                </span>
-              )}
-              {isOwn && (
-                <span className="font-medium">{message.read ? '✓✓' : '✓'}</span>
-              )}
-              {message.isPinned && (
-                <Pin className="w-3 h-3 text-yellow-500" />
-              )}
+          <div
+            className={`relative rounded-2xl px-4 py-3 shadow-lg border backdrop-blur-sm ${
+              isOwn
+                ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md border-primary/20'
+                : 'bg-gradient-to-br from-card to-card/80 border-border/50 rounded-bl-md'
+            } ${isFirstInGroup ? (isOwn ? 'rounded-tr-2xl' : 'rounded-tl-2xl') : ''}`}
+          >
+            {renderMessageContent()}
+
+            {/* Message Reactions - Fixed to show emoji + count properly */}
+            {message.reactions && message.reactions.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {message.reactions.map((reaction, index) => (
+                  <motion.button
+                    key={`${reaction.emoji}-${index}`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                      reaction.users && reaction.users.includes(user.id)
+                        ? 'bg-primary/20 text-primary border border-primary/30'
+                        : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
+                    }`}
+                    onClick={() => handleReaction(reaction.emoji)}
+                  >
+                    <span className="text-sm leading-none">{reaction.emoji}</span>
+                    <span className="text-xs font-bold leading-none">{reaction.count || 1}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+
+            <div className={`flex items-center justify-between mt-2 gap-2 text-xs opacity-70`}>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{formatTime(message.timestamp)}</span>
+                {message.isEdited && (
+                  <span className="text-muted-foreground">(edited)</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {timeLeft !== null && (
+                  <span className="text-destructive font-bold">
+                    Deletes in {timeLeft}s
+                  </span>
+                )}
+                {isOwn && (
+                  <span className="font-medium">{message.read ? '✓✓' : '✓'}</span>
+                )}
+                {message.isPinned && (
+                  <Pin className="w-3 h-3 text-yellow-500" />
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Message Actions */}
-      {showActions && !isEditing && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`flex items-center gap-1 ${
-            isOwn ? 'order-1 mr-2' : 'order-2 ml-2'
-          }`}
-        >
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-              onClick={() => setShowReactions(!showReactions)}
-            >
-              <Heart className="w-3 h-3" />
-            </Button>
-
-            {/* Quick Reactions - Fixed positioning to appear ABOVE the heart */}
-            {showReactions && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className={`absolute bottom-full mb-2 ${
-                  isOwn ? 'right-0' : 'left-0'
-                } bg-card border border-border rounded-lg p-2 shadow-xl backdrop-blur-sm z-20 flex gap-1`}
+        {/* Message Actions */}
+        {showActions && !isEditing && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`flex items-center gap-1 ${
+              isOwn ? 'order-1 mr-2' : 'order-2 ml-2'
+            }`}
+          >
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+                onClick={() => setShowReactions(!showReactions)}
               >
-                {quickReactions.map((emoji) => (
-                  <Button
-                    key={emoji}
-                    variant="ghost"
-                    size="icon"
-                    className="w-8 h-8 hover:bg-primary/20 transition-all duration-200 text-lg"
-                    onClick={() => handleReaction(emoji)}
-                  >
-                    {emoji}
-                  </Button>
-                ))}
-              </motion.div>
-            )}
-          </div>
+                <Heart className="w-3 h-3" />
+              </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-            onClick={handleReply}
-          >
-            <Reply className="w-3 h-3" />
-          </Button>
-          {message.type === 'text' && (
+              {/* Quick Reactions - Fixed positioning to appear ABOVE the heart */}
+              {showReactions && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  className={`absolute bottom-full mb-2 ${
+                    isOwn ? 'right-0' : 'left-0'
+                  } bg-card border border-border rounded-lg p-2 shadow-xl backdrop-blur-sm z-20 flex gap-1`}
+                >
+                  {quickReactions.map((emoji) => (
+                    <Button
+                      key={emoji}
+                      variant="ghost"
+                      size="icon"
+                      className="w-8 h-8 hover:bg-primary/20 transition-all duration-200 text-lg"
+                      onClick={() => handleReaction(emoji)}
+                    >
+                      {emoji}
+                    </Button>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+
             <Button
               variant="ghost"
               size="icon"
               className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-              onClick={handleCopy}
+              onClick={handleReply}
             >
-              <Copy className="w-3 h-3" />
+              <Reply className="w-3 h-3" />
             </Button>
-          )}
-          {showPin && (
+            {message.type === 'text' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+                onClick={handleCopy}
+              >
+                <Copy className="w-3 h-3" />
+              </Button>
+            )}
+            {showPin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+                onClick={handlePin}
+              >
+                <Pin className="w-3 h-3" />
+              </Button>
+            )}
+            {isOwn && message.type === 'text' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+                onClick={handleEdit}
+              >
+                <Edit className="w-3 h-3" />
+              </Button>
+            )}
+            {isOwn && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-destructive/20 transition-all duration-200"
+                onClick={handleDelete}
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
               className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-              onClick={handlePin}
+              onClick={() => onShowOptions && onShowOptions(message)}
             >
-              <Pin className="w-3 h-3" />
+              <MoreHorizontal className="w-3 h-3" />
             </Button>
-          )}
-          {isOwn && message.type === 'text' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-              onClick={handleEdit}
-            >
-              <Edit className="w-3 h-3" />
-            </Button>
-          )}
-          {isOwn && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-destructive/20 transition-all duration-200"
-              onClick={handleDelete}
-            >
-              <Trash2 className="w-3 h-3" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-            onClick={() => onShowOptions && onShowOptions(message)}
-          >
-            <MoreHorizontal className="w-3 h-3" />
-          </Button>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </motion.div>
 
       {/* Image Viewer */}
       {message.type === 'image' && message.metadata?.previewUrl && (
@@ -510,6 +512,6 @@ export default function MessageBubble({
           onClose={() => setShowImageViewer(false)}
         />
       )}
-    </div>
+    </>
   );
 }
