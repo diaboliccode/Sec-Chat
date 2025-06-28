@@ -351,7 +351,7 @@ export default function MessageBubble({
         >
           {renderMessageContent()}
 
-          {/* Message Reactions */}
+          {/* Message Reactions - Fixed positioning and display */}
           {message.reactions && message.reactions.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {message.reactions.map((reaction) => (
@@ -368,8 +368,8 @@ export default function MessageBubble({
                   }`}
                   onClick={() => handleReaction(reaction.emoji)}
                 >
-                  <span>{reaction.emoji}</span>
-                  <span>{reaction.count}</span>
+                  <span className="text-sm">{reaction.emoji}</span>
+                  <span className="text-xs font-bold">{reaction.count}</span>
                 </motion.button>
               ))}
             </div>
@@ -408,14 +408,41 @@ export default function MessageBubble({
             isOwn ? 'order-1 mr-2' : 'order-2 ml-2'
           }`}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-            onClick={() => setShowReactions(!showReactions)}
-          >
-            <Heart className="w-3 h-3" />
-          </Button>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-7 h-7 opacity-60 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+              onClick={() => setShowReactions(!showReactions)}
+            >
+              <Heart className="w-3 h-3" />
+            </Button>
+
+            {/* Quick Reactions - Fixed positioning to appear ABOVE the heart */}
+            {showReactions && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                className={`absolute bottom-full mb-2 ${
+                  isOwn ? 'right-0' : 'left-0'
+                } bg-card border border-border rounded-lg p-2 shadow-xl backdrop-blur-sm z-20 flex gap-1`}
+              >
+                {quickReactions.map((emoji) => (
+                  <Button
+                    key={emoji}
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8 hover:bg-primary/20 transition-all duration-200 text-lg"
+                    onClick={() => handleReaction(emoji)}
+                  >
+                    {emoji}
+                  </Button>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
           <Button
             variant="ghost"
             size="icon"
@@ -472,30 +499,6 @@ export default function MessageBubble({
           >
             <MoreHorizontal className="w-3 h-3" />
           </Button>
-        </motion.div>
-      )}
-
-      {/* Quick Reactions */}
-      {showReactions && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 10 }}
-          className={`absolute ${isOwn ? 'right-0' : 'left-0'} top-0 -mt-12 bg-card border border-border rounded-lg p-2 shadow-xl backdrop-blur-sm z-10`}
-        >
-          <div className="flex gap-1">
-            {quickReactions.map((emoji) => (
-              <Button
-                key={emoji}
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 hover:bg-primary/20 transition-all duration-200"
-                onClick={() => handleReaction(emoji)}
-              >
-                {emoji}
-              </Button>
-            ))}
-          </div>
         </motion.div>
       )}
 
