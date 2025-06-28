@@ -356,27 +356,36 @@ export default function MessageBubble({
           >
             {renderMessageContent()}
 
-            {/* Message Reactions - Fixed to show emoji + count properly */}
+            {/* Message Reactions - FIXED: Properly render emojis */}
             {message.reactions && message.reactions.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {message.reactions.map((reaction, index) => (
-                  <motion.button
-                    key={`${reaction.emoji}-${index}`}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                      reaction.users && reaction.users.includes(user.id)
-                        ? 'bg-primary/20 text-primary border border-primary/30'
-                        : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
-                    }`}
-                    onClick={() => handleReaction(reaction.emoji)}
-                  >
-                    <span className="text-sm leading-none">{reaction.emoji}</span>
-                    <span className="text-xs font-bold leading-none">{reaction.count || 1}</span>
-                  </motion.button>
-                ))}
+                {message.reactions.map((reaction, index) => {
+                  // Ensure we have a valid emoji string
+                  const emojiToDisplay = typeof reaction.emoji === 'string' ? reaction.emoji : '👍';
+                  const reactionCount = reaction.count || 1;
+                  
+                  return (
+                    <motion.button
+                      key={`${emojiToDisplay}-${index}`}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                        reaction.users && reaction.users.includes(user.id)
+                          ? 'bg-primary/20 text-primary border border-primary/30'
+                          : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
+                      }`}
+                      onClick={() => handleReaction(emojiToDisplay)}
+                    >
+                      {/* Render the actual emoji character */}
+                      <span className="text-sm leading-none" style={{ fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif' }}>
+                        {emojiToDisplay}
+                      </span>
+                      <span className="text-xs font-bold leading-none">{reactionCount}</span>
+                    </motion.button>
+                  );
+                })}
               </div>
             )}
 
@@ -438,10 +447,11 @@ export default function MessageBubble({
                       key={emoji}
                       variant="ghost"
                       size="icon"
-                      className="w-8 h-8 hover:bg-primary/20 transition-all duration-200 text-lg"
+                      className="w-8 h-8 hover:bg-primary/20 transition-all duration-200"
                       onClick={() => handleReaction(emoji)}
+                      style={{ fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif' }}
                     >
-                      {emoji}
+                      <span className="text-lg leading-none">{emoji}</span>
                     </Button>
                   ))}
                 </motion.div>
