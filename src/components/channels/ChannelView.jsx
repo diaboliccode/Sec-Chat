@@ -10,7 +10,7 @@ import VoiceRecorder from '@/components/chat/VoiceRecorder';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import ChannelInput from '@/components/channels/ChannelInput';
 import ChannelMembers from '@/components/channels/ChannelMembers';
-import { Pin, ArrowUp, X, Reply, Send } from 'lucide-react';
+import { Pin, ArrowUp, X, Reply, Send, PinOff } from 'lucide-react';
 
 export default function ChannelView({ channel, onBack }) {
   const { user } = useAuth();
@@ -63,7 +63,9 @@ export default function ChannelView({ channel, onBack }) {
     const saved = localStorage.getItem(`channel-messages-${channel.id}`);
     if (saved) {
       try {
-        setMessages(JSON.parse(saved));
+        const loadedMessages = JSON.parse(saved);
+        setMessages(loadedMessages);
+        setPinnedMessages(loadedMessages.filter(msg => msg.isPinned));
       } catch (error) {
         console.error('Error loading channel messages:', error);
       }
@@ -500,7 +502,7 @@ export default function ChannelView({ channel, onBack }) {
         const existingReaction = reactions.find(r => r.emoji === emoji);
         
         if (existingReaction) {
-          if (existingReaction.users.includes(user.id)) {
+          if (existingReaction.users && existingReaction.users.includes(user.id)) {
             existingReaction.users = existingReaction.users.filter(id => id !== user.id);
             existingReaction.count = existingReaction.users.length;
             if (existingReaction.count === 0) {
@@ -510,6 +512,7 @@ export default function ChannelView({ channel, onBack }) {
               };
             }
           } else {
+            existingReaction.users = existingReaction.users || [];
             existingReaction.users.push(user.id);
             existingReaction.count = existingReaction.users.length;
           }
@@ -537,22 +540,56 @@ export default function ChannelView({ channel, onBack }) {
     const updatedMessages = messages.map(message => {
       if (message.id === messageId) {
         const isPinned = !message.isPinned;
-        if (isPinned) {
-          setPinnedMessages(prev => [...prev, { ...message, isPinned }]);
-        } else {
-          setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
-        }
         return { ...message, isPinned };
       }
       return message;
     });
 
+    // Update pinned messages list
+    const newPinnedMessages = updatedMessages.filter(msg => msg.isPinned);
+    setPinnedMessages(newPinnedMessages);
+    
     setMessages(updatedMessages);
     saveChannelMessages(updatedMessages);
 
     toast({
-      title: messageToPin.isPinned ? "Message Unpinned" : "Message Pinned! 📌",
+      title: messageToPin.isPinned ? "Message Unpinned! 📌" : "Message Pinned! 📌",
       description: messageToPin.isPinned ? "Message removed from pinned" : "Message pinned to channel"
+    });
+  };
+
+  // Fixed delete message function
+  const handleDeleteMessage = (messageId) => {
+    const updatedMessages = messages.filter(msg => msg.id !== messageId);
+    const newPinnedMessages = updatedMessages.filter(msg => msg.isPinned);
+    
+    setMessages(updatedMessages);
+    setPinnedMessages(newPinnedMessages);
+    saveChannelMessages(updatedMessages);
+
+    toast({
+      title: "Message Deleted! 🗑️",
+      description: "Message has been permanently deleted"
+    });
+  };
+
+  const handleUnpinMessage = (messageId) => {
+    const updatedMessages = messages.map(message => {
+      if (message.id === messageId) {
+        return { ...message, isPinned: false };
+      }
+      return message;
+    });
+
+    const newPinnedMessages = updatedMessages.filter(msg => msg.isPinned);
+    setPinnedMessages(newPinnedMessages);
+    
+    setMessages(updatedMessages);
+    saveChannelMessages(updatedMessages);
+
+    toast({
+      title: "Message Unpinned! 📌",
+      description: "Message removed from pinned messages"
     });
   };
 
@@ -633,8 +670,19 @@ export default function ChannelView({ channel, onBack }) {
             </div>
             <div className="space-y-2">
               {pinnedMessages.slice(0, 2).map((message) => (
-                <div key={message.id} className="text-sm text-muted-foreground bg-card/50 rounded-lg p-3 border border-border/30">
-                  <span className="font-semibold">{message.senderName}:</span> {message.content}
+                <div key={message.id} className="text-sm text-muted-foreground bg-card/50 rounded-lg p-3 border border-border/30 flex items-start justify-between">
+                  <div className="flex-1">
+                    <span className="font-semibold">{message.senderName}:</span> {message.content}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-6 h-6 ml-2 opacity-60 hover:opacity-100 hover:bg-destructive/20"
+                    onClick={() => handleUnpinMessage(message.id)}
+                    title="Unpin message"
+                  >
+                    <PinOff className="w-3 h-3" />
+                  </Button>
                 </div>
               ))}
               {pinnedMessages.length > 2 && (
@@ -692,6 +740,7 @@ export default function ChannelView({ channel, onBack }) {
                     onReact={(emoji) => handleReaction(message.id, emoji)}
                     onReply={() => handleReply(message)}
                     onPin={() => handlePinMessage(message.id)}
+                    onDelete={() => handleDeleteMessage(message.id)}
                     showPin={true}
                   />
                 </motion.div>

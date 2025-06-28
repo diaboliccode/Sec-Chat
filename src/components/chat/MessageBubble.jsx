@@ -37,6 +37,7 @@ export default function MessageBubble({
   onReply, 
   onReact, 
   onPin, 
+  onDelete,
   onShowOptions,
   showPin = false 
 }) {
@@ -142,7 +143,10 @@ export default function MessageBubble({
   };
 
   const handleDelete = () => {
-    if (deleteMessage) {
+    // Use the onDelete prop if provided (for channels), otherwise use context method
+    if (onDelete) {
+      onDelete(message.id);
+    } else if (deleteMessage) {
       deleteMessage(message.chatId, message.id);
       toast({
         title: "Message Deleted",
