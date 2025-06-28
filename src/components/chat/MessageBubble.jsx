@@ -351,12 +351,12 @@ export default function MessageBubble({
         >
           {renderMessageContent()}
 
-          {/* Message Reactions - Fixed positioning and display */}
+          {/* Message Reactions - Fixed to show emoji + count properly */}
           {message.reactions && message.reactions.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {message.reactions.map((reaction) => (
+              {message.reactions.map((reaction, index) => (
                 <motion.button
-                  key={reaction.emoji}
+                  key={`${reaction.emoji}-${index}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.1 }}
@@ -368,8 +368,8 @@ export default function MessageBubble({
                   }`}
                   onClick={() => handleReaction(reaction.emoji)}
                 >
-                  <span className="text-sm">{reaction.emoji}</span>
-                  <span className="text-xs font-bold">{reaction.count}</span>
+                  <span className="text-sm leading-none">{reaction.emoji}</span>
+                  <span className="text-xs font-bold leading-none">{reaction.count || 1}</span>
                 </motion.button>
               ))}
             </div>
@@ -510,6 +510,6 @@ export default function MessageBubble({
           onClose={() => setShowImageViewer(false)}
         />
       )}
-    </motion.div>
+    </div>
   );
 }
