@@ -374,3 +374,39 @@ button[data-emoji] span,
   left: 0 !important;
   z-index: 9999 !important;
 }
+
+/* CRITICAL: Status viewer button fixes */
+.status-viewer-buttons {
+  pointer-events: auto !important;
+  z-index: 30 !important;
+}
+
+.status-viewer-buttons button {
+  pointer-events: auto !important;
+  z-index: 31 !important;
+}
+
+.status-viewer-reactions {
+  pointer-events: auto !important;
+  z-index: 40 !important;
+}
+
+.status-viewer-reactions button {
+  pointer-events: auto !important;
+  z-index: 41 !important;
+}
+
+/* Ensure status viewer overlay doesn't block buttons */
+.status-viewer-overlay {
+  pointer-events: none !important;
+}
+
+/* Status viewer action area should allow clicks */
+.status-action-area {
+  pointer-events: auto !important;
+  z-index: 20 !important;
+}
+
+.status-action-area * {
+  pointer-events: auto !important;
+}

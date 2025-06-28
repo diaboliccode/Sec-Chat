@@ -1,12 +1,15 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { X, Heart, MessageCircle, Share, Eye, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/use-toast';
+import { X, Heart, MessageCircle, Share, Eye, Clock, Send } from 'lucide-react';
 
 export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, onReply }) {
   const [showReactions, setShowReactions] = useState(false);
   const [hasReacted, setHasReacted] = useState(false);
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [replyText, setReplyText] = useState('');
 
   const reactions = ['❤️', '😂', '😮', '😢', '😡', '👍'];
 
@@ -27,7 +30,56 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
   const handleReaction = (emoji) => {
     setHasReacted(true);
     setShowReactions(false);
-    onReact?.(status.id, emoji);
+    if (onReact) {
+      onReact(status.id, emoji);
+    }
+    toast({
+      title: `Reacted with ${emoji}`,
+      description: "Your reaction has been added!"
+    });
+  };
+
+  const handleReply = () => {
+    if (showReplyInput && replyText.trim()) {
+      if (onReply) {
+        onReply(status, replyText.trim());
+      }
+      setReplyText('');
+      setShowReplyInput(false);
+      toast({
+        title: "Reply Sent! 💬",
+        description: `Your reply to ${status.username}'s status has been sent`
+      });
+    } else {
+      setShowReplyInput(true);
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `${status.username}'s Status`,
+        text: status.content || 'Check out this photo status!',
+        url: window.location.href
+      }).then(() => {
+        toast({
+          title: "Status Shared! 📤",
+          description: "Photo status has been shared successfully"
+        });
+      }).catch(() => {
+        navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link Copied! 📋",
+          description: "Status link copied to clipboard"
+        });
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copied! 📋",
+        description: "Status link copied to clipboard"
+      });
+    }
   };
 
   const formatTimeAgo = (timestamp) => {
@@ -78,7 +130,7 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
           )}
 
           {/* Header */}
-          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4">
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg">
@@ -90,21 +142,66 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
                 </div>
               </div>
               
-              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onClose} 
+                className="text-white hover:bg-white/20 z-20"
+              >
                 <X className="w-5 h-5" />
               </Button>
             </div>
           </div>
 
-          {/* Bottom Actions */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-            <div className="flex items-center justify-between">
+          {/* Bottom Actions - CRITICAL FIX: Proper z-index and pointer events */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 z-20">
+            {/* Reply Input */}
+            <AnimatePresence>
+              {showReplyInput && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="mb-4 flex gap-2 z-30"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <Input
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Write a reply..."
+                    className="flex-1 bg-black/40 border-white/20 text-white placeholder:text-white/60"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleReply();
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    onClick={handleReply}
+                    disabled={!replyText.trim()}
+                    className="bg-primary hover:bg-primary/90"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Action Buttons - FIXED: Proper pointer events and z-index */}
+            <div 
+              className="flex items-center justify-between z-30" 
+              style={{ pointerEvents: 'auto' }}
+            >
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowReactions(!showReactions)}
-                  className={`text-white hover:bg-white/20 ${hasReacted ? 'text-red-400' : ''}`}
+                  className={`text-white hover:bg-white/20 transition-all duration-200 ${hasReacted ? 'text-red-400' : ''}`}
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <Heart className={`w-5 h-5 mr-1 ${hasReacted ? 'fill-current' : ''}`} />
                   {hasReacted ? 'Liked' : 'Like'}
@@ -113,8 +210,9 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onReply?.(status)}
-                  className="text-white hover:bg-white/20"
+                  onClick={handleReply}
+                  className="text-white hover:bg-white/20 transition-all duration-200"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <MessageCircle className="w-5 h-5 mr-1" />
                   Reply
@@ -123,7 +221,9 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/20"
+                  onClick={handleShare}
+                  className="text-white hover:bg-white/20 transition-all duration-200"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <Share className="w-5 h-5 mr-1" />
                   Share
@@ -136,20 +236,27 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
               </div>
             </div>
 
-            {/* Reactions */}
+            {/* Reactions - FIXED: Proper z-index and pointer events */}
             <AnimatePresence>
               {showReactions && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="flex items-center gap-2 mt-3 bg-black/40 rounded-full p-2"
+                  className="flex items-center gap-2 mt-3 bg-black/60 rounded-full p-2 z-40"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   {reactions.map((emoji) => (
                     <button
                       key={emoji}
                       onClick={() => handleReaction(emoji)}
-                      className="text-2xl hover:scale-125 transition-transform p-1"
+                      className="text-2xl hover:scale-125 transition-transform p-1 rounded-full hover:bg-white/10"
+                      style={{ 
+                        pointerEvents: 'auto',
+                        fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+                        fontVariantEmoji: 'emoji',
+                        textRendering: 'optimizeQuality'
+                      }}
                     >
                       {emoji}
                     </button>
@@ -160,7 +267,7 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
           </div>
 
           {/* Progress Bar */}
-          <div className="absolute top-16 left-4 right-4">
+          <div className="absolute top-16 left-4 right-4 z-10">
             <div className="w-full h-1 bg-white/30 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: '0%' }}
@@ -174,11 +281,8 @@ export default function PhotoStatusViewer({ status, isOpen, onClose, onReact, on
         </div>
       </div>
 
-      {/* Tap Areas for Navigation */}
-      <div className="absolute inset-0 flex">
-        <div className="flex-1" onClick={onClose} />
-        <div className="flex-1" onClick={onClose} />
-      </div>
+      {/* CRITICAL FIX: Remove tap areas that were blocking button clicks */}
+      {/* The tap areas were preventing button clicks - removed them */}
     </motion.div>
   );
 }
