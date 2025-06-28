@@ -10,7 +10,7 @@ import VoiceRecorder from '@/components/chat/VoiceRecorder';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import ChannelInput from '@/components/channels/ChannelInput';
 import ChannelMembers from '@/components/channels/ChannelMembers';
-import { Pin, ArrowUp, X } from 'lucide-react';
+import { Pin, ArrowUp, X, Reply, Send } from 'lucide-react';
 
 export default function ChannelView({ channel, onBack }) {
   const { user } = useAuth();
@@ -28,6 +28,8 @@ export default function ChannelView({ channel, onBack }) {
   const [notifications, setNotifications] = useState(true);
   const [channelMuted, setChannelMuted] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -66,7 +68,7 @@ export default function ChannelView({ channel, onBack }) {
         console.error('Error loading channel messages:', error);
       }
     } else {
-      // Create more demo messages to test scrolling
+      // Create more demo messages to test scrolling and replies
       const demoMessages = [
         {
           id: 1,
@@ -102,6 +104,20 @@ export default function ChannelView({ channel, onBack }) {
         },
         {
           id: 4,
+          senderId: 'demo-user-2',
+          senderName: 'Sarah Wilson',
+          senderAvatar: '👩‍🎨',
+          content: 'I totally agree! The possibilities are endless.',
+          timestamp: new Date(Date.now() - 5900000).toISOString(),
+          type: 'reply',
+          replyTo: {
+            id: 3,
+            senderName: 'Mike Johnson',
+            content: 'This channel is going to be awesome! 🚀'
+          }
+        },
+        {
+          id: 5,
           senderId: 'demo-user-4',
           senderName: 'Emma Davis',
           senderAvatar: '👩‍💼',
@@ -110,19 +126,24 @@ export default function ChannelView({ channel, onBack }) {
           type: 'text'
         },
         {
-          id: 5,
+          id: 6,
           senderId: 'demo-user-5',
           senderName: 'James Brown',
           senderAvatar: '👨‍🔬',
           content: 'I\'ve been testing them all week. The performance improvements are amazing! 📈',
           timestamp: new Date(Date.now() - 4800000).toISOString(),
-          type: 'text',
+          type: 'reply',
+          replyTo: {
+            id: 5,
+            senderName: 'Emma Davis',
+            content: 'Has anyone tried the new features yet? They look incredible!'
+          },
           reactions: [
             { emoji: '📈', users: ['demo-user-1', 'demo-user-3'], count: 2 }
           ]
         },
         {
-          id: 6,
+          id: 7,
           senderId: 'demo-user-6',
           senderName: 'Lisa Wang',
           senderAvatar: '👩‍🔬',
@@ -131,16 +152,21 @@ export default function ChannelView({ channel, onBack }) {
           type: 'text'
         },
         {
-          id: 7,
+          id: 8,
           senderId: 'demo-user-1',
           senderName: 'Alex Chen',
           senderAvatar: '👨‍💻',
           content: 'Thanks everyone! We put a lot of effort into making everything user-friendly.',
           timestamp: new Date(Date.now() - 3600000).toISOString(),
-          type: 'text'
+          type: 'reply',
+          replyTo: {
+            id: 7,
+            senderName: 'Lisa Wang',
+            content: 'The documentation is really well written too. Makes it easy to get started.'
+          }
         },
         {
-          id: 8,
+          id: 9,
           senderId: 'demo-user-7',
           senderName: 'David Kim',
           senderAvatar: '👨‍🎨',
@@ -152,7 +178,7 @@ export default function ChannelView({ channel, onBack }) {
           ]
         },
         {
-          id: 9,
+          id: 10,
           senderId: 'demo-user-8',
           senderName: 'Rachel Green',
           senderAvatar: '👩‍🚀',
@@ -161,7 +187,7 @@ export default function ChannelView({ channel, onBack }) {
           type: 'text'
         },
         {
-          id: 10,
+          id: 11,
           senderId: 'demo-user-9',
           senderName: 'Tom Wilson',
           senderAvatar: '👨‍🏫',
@@ -173,22 +199,18 @@ export default function ChannelView({ channel, onBack }) {
           ]
         },
         {
-          id: 11,
+          id: 12,
           senderId: 'demo-user-10',
           senderName: 'Anna Martinez',
           senderAvatar: '👩‍💻',
-          content: 'The voice messages feature is so convenient! Perfect for when I\'m on the go. 🎤',
-          timestamp: new Date(Date.now() - 1200000).toISOString(),
-          type: 'text'
-        },
-        {
-          id: 12,
-          senderId: 'demo-user-2',
-          senderName: 'Sarah Wilson',
-          senderAvatar: '👩‍🎨',
-          content: 'File sharing works seamlessly too. No more email attachments! 📎',
-          timestamp: new Date(Date.now() - 600000).toISOString(),
-          type: 'text'
+          content: 'Absolutely! Privacy should always be the top priority.',
+          timestamp: new Date(Date.now() - 1700000).toISOString(),
+          type: 'reply',
+          replyTo: {
+            id: 11,
+            senderName: 'Tom Wilson',
+            content: 'The security features are top-notch. End-to-end encryption gives me peace of mind. 🔒'
+          }
         },
         {
           id: 13,
@@ -240,54 +262,6 @@ export default function ChannelView({ channel, onBack }) {
           content: 'Can\'t wait to see what new features are coming next! This is just the beginning. 🌟',
           timestamp: new Date(Date.now() - 30000).toISOString(),
           type: 'text'
-        },
-        {
-          id: 18,
-          senderId: 'demo-user-16',
-          senderName: 'Olivia Johnson',
-          senderAvatar: '👩‍🎤',
-          content: 'The real-time sync is incredible. Messages appear instantly across all devices! ⚡',
-          timestamp: new Date(Date.now() - 25000).toISOString(),
-          type: 'text'
-        },
-        {
-          id: 19,
-          senderId: 'demo-user-17',
-          senderName: 'Marcus Williams',
-          senderAvatar: '👨‍🚀',
-          content: 'I love the dark theme. Easy on the eyes during late night coding sessions! 🌙',
-          timestamp: new Date(Date.now() - 20000).toISOString(),
-          type: 'text'
-        },
-        {
-          id: 20,
-          senderId: 'demo-user-18',
-          senderName: 'Isabella Garcia',
-          senderAvatar: '👩‍🔬',
-          content: 'The search functionality is so fast and accurate. Finding old messages is a breeze! 🔍',
-          timestamp: new Date(Date.now() - 15000).toISOString(),
-          type: 'text'
-        },
-        {
-          id: 21,
-          senderId: 'demo-user-19',
-          senderName: 'Nathan Brown',
-          senderAvatar: '👨‍💼',
-          content: 'Group video calls work flawlessly. Crystal clear audio and video quality! 📹',
-          timestamp: new Date(Date.now() - 10000).toISOString(),
-          type: 'text'
-        },
-        {
-          id: 22,
-          senderId: 'demo-user-20',
-          senderName: 'Zoe Martinez',
-          senderAvatar: '👩‍🎨',
-          content: 'The emoji reactions add so much personality to conversations! 😄',
-          timestamp: new Date(Date.now() - 5000).toISOString(),
-          type: 'text',
-          reactions: [
-            { emoji: '😄', users: ['demo-user-1', 'demo-user-5', 'demo-user-10'], count: 3 }
-          ]
         }
       ];
       setMessages(demoMessages);
@@ -393,8 +367,49 @@ export default function ChannelView({ channel, onBack }) {
 
     toast({
       title: "Message Sent! 📢",
-      description: `Your styled message was sent to #${channel.name}`
+      description: `Your message was sent to #${channel.name}`
     });
+  };
+
+  const handleSendReply = () => {
+    if (!replyText.trim() || !replyingTo) return;
+
+    const replyMessage = {
+      id: Date.now(),
+      senderId: user.id,
+      senderName: user.username,
+      senderAvatar: user.avatar,
+      content: replyText,
+      timestamp: new Date().toISOString(),
+      type: 'reply',
+      replyTo: {
+        id: replyingTo.id,
+        senderName: replyingTo.senderName,
+        content: replyingTo.content
+      },
+      reactions: []
+    };
+
+    const updatedMessages = [...messages, replyMessage];
+    setMessages(updatedMessages);
+    saveChannelMessages(updatedMessages);
+    setReplyText('');
+    setReplyingTo(null);
+
+    toast({
+      title: "Reply Sent! 💬",
+      description: `Your reply to ${replyingTo.senderName} was sent`
+    });
+  };
+
+  const handleReply = (message) => {
+    setReplyingTo(message);
+    setReplyText('');
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+    setReplyText('');
   };
 
   const handleTyping = (value) => {
@@ -414,7 +429,11 @@ export default function ChannelView({ channel, onBack }) {
   };
 
   const handleEmojiSelect = (emoji) => {
-    setNewMessage(prev => prev + emoji);
+    if (replyingTo) {
+      setReplyText(prev => prev + emoji);
+    } else {
+      setNewMessage(prev => prev + emoji);
+    }
     setShowEmojiPicker(false);
   };
 
@@ -650,14 +669,28 @@ export default function ChannelView({ channel, onBack }) {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.02 }}
                 >
+                  {/* Reply Context */}
+                  {message.type === 'reply' && message.replyTo && (
+                    <div className="mb-2 ml-4">
+                      <div className="bg-muted/30 border-l-4 border-primary/50 pl-3 py-2 rounded-r-lg max-w-md">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Reply className="w-3 h-3 text-primary" />
+                          <span className="text-xs font-medium text-primary">
+                            Replying to {message.replyTo.senderName}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {message.replyTo.content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
                   <MessageBubble
                     message={message}
                     isOwn={message.senderId === user.id}
                     onReact={(emoji) => handleReaction(message.id, emoji)}
-                    onReply={() => toast({
-                      title: "🚧 Reply Feature",
-                      description: "Message replies aren't implemented yet—but don't worry! You can request them in your next prompt! 🚀"
-                    })}
+                    onReply={() => handleReply(message)}
                     onPin={() => handlePinMessage(message.id)}
                     showPin={true}
                   />
@@ -707,21 +740,85 @@ export default function ChannelView({ channel, onBack }) {
             </Button>
           </div>
 
+          {/* Reply Section */}
+          <AnimatePresence>
+            {replyingTo && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="border-t border-border bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm p-4 flex-shrink-0"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <Reply className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-primary">
+                        Replying to {replyingTo.senderName}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-5 h-5 hover:bg-destructive/20"
+                        onClick={handleCancelReply}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="bg-muted/50 border-l-4 border-primary pl-3 py-2 rounded-r-lg">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {replyingTo.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder={`Reply to ${replyingTo.senderName}...`}
+                    className="flex-1 bg-background/50 border-border/50 focus:border-primary/50"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendReply();
+                      } else if (e.key === 'Escape') {
+                        handleCancelReply();
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    onClick={handleSendReply}
+                    disabled={!replyText.trim()}
+                    size="icon"
+                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Message Input - Fixed at bottom */}
-          <div className="flex-shrink-0">
-            <ChannelInput
-              newMessage={newMessage}
-              showEmojiPicker={showEmojiPicker}
-              channelName={channel.name}
-              onMessageChange={handleTyping}
-              onSendMessage={handleSendMessage}
-              onToggleEmojiPicker={() => setShowEmojiPicker(!showEmojiPicker)}
-              onEmojiSelect={handleEmojiSelect}
-              onFileUpload={() => setShowFileUpload(true)}
-              onVoiceRecord={() => setIsRecording(true)}
-              onApplyStyle={applyTextStyle}
-            />
-          </div>
+          {!replyingTo && (
+            <div className="flex-shrink-0">
+              <ChannelInput
+                newMessage={newMessage}
+                showEmojiPicker={showEmojiPicker}
+                channelName={channel.name}
+                onMessageChange={handleTyping}
+                onSendMessage={handleSendMessage}
+                onToggleEmojiPicker={() => setShowEmojiPicker(!showEmojiPicker)}
+                onEmojiSelect={handleEmojiSelect}
+                onFileUpload={() => setShowFileUpload(true)}
+                onVoiceRecord={() => setIsRecording(true)}
+                onApplyStyle={applyTextStyle}
+              />
+            </div>
+          )}
         </div>
 
         {/* Members Sidebar */}
