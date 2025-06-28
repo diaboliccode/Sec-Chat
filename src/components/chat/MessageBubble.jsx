@@ -108,12 +108,14 @@ export default function MessageBubble({
     }
   };
 
-  // FIXED: Properly handle emoji reactions with correct emoji data
+  // CRITICAL FIX: Ensure emoji is properly handled and displayed
   const handleReaction = (emoji) => {
-    console.log('Reacting with emoji:', emoji); // Debug log
-    if (onReact) {
-      // Pass the exact emoji that was clicked
-      onReact(message.id, emoji);
+    // Ensure we're working with a proper emoji string
+    const cleanEmoji = String(emoji).trim();
+    console.log('Reacting with emoji:', cleanEmoji, 'Type:', typeof cleanEmoji); // Debug log
+    
+    if (onReact && cleanEmoji) {
+      onReact(message.id, cleanEmoji);
     }
     setShowReactions(false);
   };
@@ -172,8 +174,21 @@ export default function MessageBubble({
     }
   };
 
-  // FIXED: Ensure each emoji is unique and properly handled
+  // FIXED: Proper emoji array with Unicode emojis
   const quickReactions = ['❤️', '👍', '😂', '😮', '😢', '😡'];
+
+  // Helper function to ensure proper emoji rendering
+  const renderEmoji = (emoji) => {
+    // Ensure we have a valid emoji string
+    const emojiStr = String(emoji || '').trim();
+    
+    // If it's empty or looks like a number, return a fallback
+    if (!emojiStr || /^\d+$/.test(emojiStr)) {
+      return '👍'; // Fallback emoji
+    }
+    
+    return emojiStr;
+  };
 
   const renderMessageContent = () => {
     if (isEditing && message.type === 'text') {
@@ -360,21 +375,25 @@ export default function MessageBubble({
           >
             {renderMessageContent()}
 
-            {/* Message Reactions - FIXED: Properly render each unique emoji */}
+            {/* Message Reactions - CRITICAL FIX: Proper emoji rendering with fallbacks */}
             {message.reactions && message.reactions.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {message.reactions.map((reaction, index) => {
-                  // CRITICAL FIX: Ensure we preserve the exact emoji from the reaction
-                  const emojiToDisplay = reaction.emoji;
+                  // CRITICAL: Ensure proper emoji handling
+                  const displayEmoji = renderEmoji(reaction.emoji);
                   const reactionCount = reaction.count || 1;
                   const isUserReacted = reaction.users && reaction.users.includes(user.id);
                   
-                  // Debug log to see what emoji we're rendering
-                  console.log('Rendering reaction:', { emoji: emojiToDisplay, count: reactionCount, isUserReacted });
+                  console.log('Rendering reaction:', { 
+                    original: reaction.emoji, 
+                    display: displayEmoji, 
+                    count: reactionCount, 
+                    isUserReacted 
+                  });
                   
                   return (
                     <motion.button
-                      key={`${emojiToDisplay}-${index}-${reaction.users?.join(',') || ''}`}
+                      key={`reaction-${index}-${reaction.emoji}-${reactionCount}`}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       whileHover={{ scale: 1.1 }}
@@ -384,17 +403,19 @@ export default function MessageBubble({
                           ? 'bg-primary/20 text-primary border border-primary/30'
                           : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
                       }`}
-                      onClick={() => handleReaction(emojiToDisplay)}
+                      onClick={() => handleReaction(reaction.emoji)}
                     >
-                      {/* FIXED: Render the exact emoji with proper font family */}
+                      {/* CRITICAL FIX: Proper emoji rendering with comprehensive font stack */}
                       <span 
-                        className="text-sm leading-none select-none" 
+                        className="text-sm leading-none select-none inline-block" 
                         style={{ 
-                          fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Twemoji Mozilla", sans-serif',
-                          fontSize: '14px'
+                          fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+                          fontSize: '14px',
+                          fontVariantEmoji: 'emoji',
+                          textRendering: 'optimizeQuality'
                         }}
                       >
-                        {emojiToDisplay}
+                        {displayEmoji}
                       </span>
                       <span className="text-xs font-bold leading-none">{reactionCount}</span>
                     </motion.button>
@@ -446,7 +467,7 @@ export default function MessageBubble({
                 <Heart className="w-3 h-3" />
               </Button>
 
-              {/* Quick Reactions - FIXED: Each emoji button passes the correct emoji */}
+              {/* Quick Reactions - FIXED: Proper emoji buttons with enhanced rendering */}
               {showReactions && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -458,20 +479,22 @@ export default function MessageBubble({
                 >
                   {quickReactions.map((emoji, emojiIndex) => (
                     <Button
-                      key={`quick-reaction-${emoji}-${emojiIndex}`}
+                      key={`quick-${emojiIndex}-${emoji}`}
                       variant="ghost"
                       size="icon"
                       className="w-8 h-8 hover:bg-primary/20 transition-all duration-200"
                       onClick={() => {
-                        console.log('Quick reaction clicked:', emoji); // Debug log
+                        console.log('Quick reaction clicked:', emoji);
                         handleReaction(emoji);
                       }}
                     >
                       <span 
-                        className="text-lg leading-none select-none"
+                        className="text-lg leading-none select-none inline-block"
                         style={{ 
-                          fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Twemoji Mozilla", sans-serif',
-                          fontSize: '16px'
+                          fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+                          fontSize: '16px',
+                          fontVariantEmoji: 'emoji',
+                          textRendering: 'optimizeQuality'
                         }}
                       >
                         {emoji}
