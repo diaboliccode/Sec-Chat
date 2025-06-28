@@ -116,17 +116,21 @@ export default function EnhancedEmojiPicker({ onEmojiSelect, onClose }) {
       initial={{ opacity: 0, scale: 0.9, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: 10 }}
-      className="bg-card border border-border rounded-lg shadow-xl w-80 h-96 flex flex-col overflow-hidden"
+      className="bg-card border border-border rounded-lg shadow-xl w-80 h-96 flex flex-col overflow-hidden z-[9999] relative"
+      style={{
+        position: 'fixed',
+        zIndex: 9999
+      }}
     >
       {/* Header with search */}
-      <div className="p-3 border-b border-border">
+      <div className="p-3 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search emojis..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-8"
+            className="pl-10 h-8 bg-background/50"
           />
         </div>
       </div>
@@ -168,6 +172,11 @@ export default function EnhancedEmojiPicker({ onEmojiSelect, onClose }) {
               whileTap={{ scale: 0.9 }}
               className="w-8 h-8 flex items-center justify-center text-lg hover:bg-accent rounded transition-colors"
               onClick={() => handleEmojiClick(emoji)}
+              style={{
+                fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+                fontVariantEmoji: 'emoji',
+                textRendering: 'optimizeQuality'
+              }}
             >
               {emoji}
             </motion.button>
@@ -192,6 +201,11 @@ export default function EnhancedEmojiPicker({ onEmojiSelect, onClose }) {
             size="sm"
             className="w-6 h-6 p-0 text-lg"
             onClick={() => handleEmojiClick('👋')}
+            style={{
+              fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+              fontVariantEmoji: 'emoji',
+              textRendering: 'optimizeQuality'
+            }}
           >
             👋
           </Button>
@@ -202,6 +216,11 @@ export default function EnhancedEmojiPicker({ onEmojiSelect, onClose }) {
               size="sm"
               className="w-6 h-6 p-0 text-lg"
               onClick={() => handleEmojiClick(`👋${tone}`)}
+              style={{
+                fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif',
+                fontVariantEmoji: 'emoji',
+                textRendering: 'optimizeQuality'
+              }}
             >
               👋{tone}
             </Button>

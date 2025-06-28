@@ -263,7 +263,7 @@ export default function StatusUpdates() {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background relative">
       {/* Header */}
       <div className="p-6 border-b border-border">
         <h1 className="text-2xl font-bold text-foreground mb-2">Status Updates</h1>
@@ -271,7 +271,7 @@ export default function StatusUpdates() {
       </div>
 
       {/* Create Status */}
-      <div className="p-4 border-b border-border bg-card/50">
+      <div className="p-4 border-b border-border bg-card/50 relative">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg">
             {user?.avatar || '👤'}
@@ -283,23 +283,6 @@ export default function StatusUpdates() {
               onChange={(e) => setStatusText(e.target.value)}
               className="border-none bg-transparent text-lg placeholder:text-muted-foreground focus-visible:ring-0"
             />
-            
-            {/* Emoji Picker */}
-            <AnimatePresence>
-              {showEmojiPicker && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute bottom-full right-0 mb-2 z-50"
-                >
-                  <EnhancedEmojiPicker 
-                    onEmojiSelect={handleEmojiSelect}
-                    onClose={() => setShowEmojiPicker(false)}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
 
@@ -321,14 +304,35 @@ export default function StatusUpdates() {
               <Type className="w-4 h-4 mr-2" />
               Style
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <Smile className="w-4 h-4 mr-2" />
-              Emoji
-            </Button>
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <Smile className="w-4 h-4 mr-2" />
+                Emoji
+              </Button>
+              
+              {/* FIXED: Proper emoji picker positioning */}
+              {showEmojiPicker && (
+                <div 
+                  className="absolute bottom-full left-0 mb-2 z-[9999]"
+                  style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: '0',
+                    marginBottom: '8px',
+                    zIndex: 9999
+                  }}
+                >
+                  <EnhancedEmojiPicker 
+                    onEmojiSelect={handleEmojiSelect}
+                    onClose={() => setShowEmojiPicker(false)}
+                  />
+                </div>
+              )}
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -540,6 +544,14 @@ export default function StatusUpdates() {
         onApplyStyle={handleTextStyle}
         selectedText={statusText}
       />
+
+      {/* Overlay to close emoji picker when clicking outside */}
+      {showEmojiPicker && (
+        <div 
+          className="fixed inset-0 z-[9998]" 
+          onClick={() => setShowEmojiPicker(false)}
+        />
+      )}
     </div>
   );
 }
