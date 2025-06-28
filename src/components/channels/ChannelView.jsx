@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import MessageBubble from '@/components/chat/MessageBubble';
 import FileUpload from '@/components/chat/FileUpload';
 import VoiceRecorder from '@/components/chat/VoiceRecorder';
 import TypingIndicator from '@/components/chat/TypingIndicator';
-import ChannelHeader from '@/components/channels/ChannelHeader';
 import ChannelInput from '@/components/channels/ChannelInput';
 import ChannelMembers from '@/components/channels/ChannelMembers';
-import { Pin } from 'lucide-react';
+import { Pin, ArrowUp, X } from 'lucide-react';
 
 export default function ChannelView({ channel, onBack }) {
   const { user } = useAuth();
@@ -27,6 +27,7 @@ export default function ChannelView({ channel, onBack }) {
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [channelMuted, setChannelMuted] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -40,6 +41,21 @@ export default function ChannelView({ channel, onBack }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle scroll to show/hide scroll-to-top button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShowScrollToTop(!isNearBottom && scrollTop > 200);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const loadChannelMessages = () => {
     const saved = localStorage.getItem(`channel-messages-${channel.id}`);
@@ -306,6 +322,12 @@ export default function ChannelView({ channel, onBack }) {
     }
   };
 
+  const scrollToTop = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const applyTextStyle = (style) => {
     const textarea = document.querySelector('input[placeholder*="Message"]');
     if (!textarea) return;
@@ -557,22 +579,7 @@ export default function ChannelView({ channel, onBack }) {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-background via-background to-background/95">
-      {/* Channel Header */}
-      <ChannelHeader
-        channel={channel}
-        channelMembers={channelMembers}
-        pinnedMessages={pinnedMessages}
-        channelMuted={channelMuted}
-        notifications={notifications}
-        showSearch={showSearch}
-        onBack={onBack}
-        onToggleSearch={() => setShowSearch(!showSearch)}
-        onToggleNotifications={toggleNotifications}
-        onToggleMute={toggleMute}
-        onToggleMembers={() => setShowMembers(!showMembers)}
-      />
-
+    <div className="h-full flex flex-col bg-gradient-to-br from-background via-background to-background/95 relative">
       {/* Search Bar */}
       <AnimatePresence>
         {showSearch && (
@@ -624,15 +631,14 @@ export default function ChannelView({ channel, onBack }) {
       {/* Main Content Area with Proper Height */}
       <div className="flex-1 flex overflow-hidden">
         {/* Messages Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden relative">
           {/* Messages Container with Fixed Height and Scrolling */}
           <div 
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50"
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50 scroll-smooth"
             style={{ 
               height: '100%',
-              maxHeight: '100%',
-              scrollBehavior: 'smooth'
+              maxHeight: '100%'
             }}
           >
             <AnimatePresence>
@@ -666,6 +672,39 @@ export default function ChannelView({ channel, onBack }) {
             
             {/* Scroll anchor */}
             <div ref={messagesEndRef} className="h-1" />
+          </div>
+
+          {/* Scroll to Top Button */}
+          <AnimatePresence>
+            {showScrollToTop && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute bottom-20 right-6 z-10"
+              >
+                <Button
+                  onClick={scrollToTop}
+                  size="icon"
+                  className="rounded-full shadow-lg bg-primary/90 hover:bg-primary backdrop-blur-sm"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Exit Channel Button - Always Visible */}
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              onClick={onBack}
+              variant="secondary"
+              size="sm"
+              className="bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-lg"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Exit Channel
+            </Button>
           </div>
 
           {/* Message Input - Fixed at bottom */}

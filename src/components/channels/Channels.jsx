@@ -253,19 +253,19 @@ export default function Channels() {
   // Show channel view if a channel is selected
   if (selectedChannel) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Back Button Header */}
-        <div className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-4">
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* Fixed Back Navigation Header - Always Visible */}
+        <div className="h-16 border-b border-border bg-card/80 backdrop-blur-sm flex items-center px-4 flex-shrink-0 z-10">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleBackToChannels}
-            className="mr-3"
+            className="mr-3 hover:bg-primary/20 transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-lg">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-lg shadow-lg">
               {selectedChannel.icon}
             </div>
             <div>
@@ -273,10 +273,33 @@ export default function Channels() {
               <p className="text-xs text-muted-foreground">{selectedChannel.members} members</p>
             </div>
           </div>
+          
+          {/* Quick Actions */}
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toast({
+                title: "🚧 Channel Info",
+                description: "Channel information panel isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+              })}
+              className="text-xs"
+            >
+              Info
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToChannels}
+              className="text-xs"
+            >
+              Exit
+            </Button>
+          </div>
         </div>
         
-        {/* Channel View */}
-        <div className="flex-1">
+        {/* Channel View - Takes remaining space */}
+        <div className="flex-1 overflow-hidden">
           <ChannelView
             channel={selectedChannel}
             onBack={handleBackToChannels}
@@ -287,9 +310,9 @@ export default function Channels() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-border flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-2">Channels</h1>
@@ -322,7 +345,7 @@ export default function Channels() {
         </div>
       </div>
 
-      {/* Channel Lists */}
+      {/* Channel Lists - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         {/* Subscribed Channels */}
         {subscribedChannels.length > 0 && (
