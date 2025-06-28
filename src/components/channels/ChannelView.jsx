@@ -224,6 +224,54 @@ export default function ChannelView({ channel, onBack }) {
           content: 'Can\'t wait to see what new features are coming next! This is just the beginning. 🌟',
           timestamp: new Date(Date.now() - 30000).toISOString(),
           type: 'text'
+        },
+        {
+          id: 18,
+          senderId: 'demo-user-16',
+          senderName: 'Olivia Johnson',
+          senderAvatar: '👩‍🎤',
+          content: 'The real-time sync is incredible. Messages appear instantly across all devices! ⚡',
+          timestamp: new Date(Date.now() - 25000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 19,
+          senderId: 'demo-user-17',
+          senderName: 'Marcus Williams',
+          senderAvatar: '👨‍🚀',
+          content: 'I love the dark theme. Easy on the eyes during late night coding sessions! 🌙',
+          timestamp: new Date(Date.now() - 20000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 20,
+          senderId: 'demo-user-18',
+          senderName: 'Isabella Garcia',
+          senderAvatar: '👩‍🔬',
+          content: 'The search functionality is so fast and accurate. Finding old messages is a breeze! 🔍',
+          timestamp: new Date(Date.now() - 15000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 21,
+          senderId: 'demo-user-19',
+          senderName: 'Nathan Brown',
+          senderAvatar: '👨‍💼',
+          content: 'Group video calls work flawlessly. Crystal clear audio and video quality! 📹',
+          timestamp: new Date(Date.now() - 10000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 22,
+          senderId: 'demo-user-20',
+          senderName: 'Zoe Martinez',
+          senderAvatar: '👩‍🎨',
+          content: 'The emoji reactions add so much personality to conversations! 😄',
+          timestamp: new Date(Date.now() - 5000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '😄', users: ['demo-user-1', 'demo-user-5', 'demo-user-10'], count: 3 }
+          ]
         }
       ];
       setMessages(demoMessages);
@@ -532,7 +580,7 @@ export default function ChannelView({ channel, onBack }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-border bg-gradient-to-r from-card/40 to-card/20 backdrop-blur-sm p-4"
+            className="border-b border-border bg-gradient-to-r from-card/40 to-card/20 backdrop-blur-sm p-4 flex-shrink-0"
           >
             <Input
               placeholder="Search messages..."
@@ -573,16 +621,18 @@ export default function ChannelView({ channel, onBack }) {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex min-h-0">
+      {/* Main Content Area with Proper Height */}
+      <div className="flex-1 flex overflow-hidden">
         {/* Messages Area */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Messages Container with Proper Scrolling */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Messages Container with Fixed Height and Scrolling */}
           <div 
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50 custom-scrollbar"
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50"
             style={{ 
-              scrollBehavior: 'smooth',
-              overflowAnchor: 'auto'
+              height: '100%',
+              maxHeight: '100%',
+              scrollBehavior: 'smooth'
             }}
           >
             <AnimatePresence>
