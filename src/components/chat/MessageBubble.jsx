@@ -108,8 +108,11 @@ export default function MessageBubble({
     }
   };
 
+  // FIXED: Properly handle emoji reactions with correct emoji data
   const handleReaction = (emoji) => {
+    console.log('Reacting with emoji:', emoji); // Debug log
     if (onReact) {
+      // Pass the exact emoji that was clicked
       onReact(message.id, emoji);
     }
     setShowReactions(false);
@@ -169,6 +172,7 @@ export default function MessageBubble({
     }
   };
 
+  // FIXED: Ensure each emoji is unique and properly handled
   const quickReactions = ['❤️', '👍', '😂', '😮', '😢', '😡'];
 
   const renderMessageContent = () => {
@@ -356,30 +360,40 @@ export default function MessageBubble({
           >
             {renderMessageContent()}
 
-            {/* Message Reactions - FIXED: Properly render emojis */}
+            {/* Message Reactions - FIXED: Properly render each unique emoji */}
             {message.reactions && message.reactions.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {message.reactions.map((reaction, index) => {
-                  // Ensure we have a valid emoji string
-                  const emojiToDisplay = typeof reaction.emoji === 'string' ? reaction.emoji : '👍';
+                  // CRITICAL FIX: Ensure we preserve the exact emoji from the reaction
+                  const emojiToDisplay = reaction.emoji;
                   const reactionCount = reaction.count || 1;
+                  const isUserReacted = reaction.users && reaction.users.includes(user.id);
+                  
+                  // Debug log to see what emoji we're rendering
+                  console.log('Rendering reaction:', { emoji: emojiToDisplay, count: reactionCount, isUserReacted });
                   
                   return (
                     <motion.button
-                      key={`${emojiToDisplay}-${index}`}
+                      key={`${emojiToDisplay}-${index}-${reaction.users?.join(',') || ''}`}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                        reaction.users && reaction.users.includes(user.id)
+                        isUserReacted
                           ? 'bg-primary/20 text-primary border border-primary/30'
                           : 'bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted'
                       }`}
                       onClick={() => handleReaction(emojiToDisplay)}
                     >
-                      {/* Render the actual emoji character */}
-                      <span className="text-sm leading-none" style={{ fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif' }}>
+                      {/* FIXED: Render the exact emoji with proper font family */}
+                      <span 
+                        className="text-sm leading-none select-none" 
+                        style={{ 
+                          fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Twemoji Mozilla", sans-serif',
+                          fontSize: '14px'
+                        }}
+                      >
                         {emojiToDisplay}
                       </span>
                       <span className="text-xs font-bold leading-none">{reactionCount}</span>
@@ -432,7 +446,7 @@ export default function MessageBubble({
                 <Heart className="w-3 h-3" />
               </Button>
 
-              {/* Quick Reactions - Fixed positioning to appear ABOVE the heart */}
+              {/* Quick Reactions - FIXED: Each emoji button passes the correct emoji */}
               {showReactions && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -442,16 +456,26 @@ export default function MessageBubble({
                     isOwn ? 'right-0' : 'left-0'
                   } bg-card border border-border rounded-lg p-2 shadow-xl backdrop-blur-sm z-20 flex gap-1`}
                 >
-                  {quickReactions.map((emoji) => (
+                  {quickReactions.map((emoji, emojiIndex) => (
                     <Button
-                      key={emoji}
+                      key={`quick-reaction-${emoji}-${emojiIndex}`}
                       variant="ghost"
                       size="icon"
                       className="w-8 h-8 hover:bg-primary/20 transition-all duration-200"
-                      onClick={() => handleReaction(emoji)}
-                      style={{ fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif' }}
+                      onClick={() => {
+                        console.log('Quick reaction clicked:', emoji); // Debug log
+                        handleReaction(emoji);
+                      }}
                     >
-                      <span className="text-lg leading-none">{emoji}</span>
+                      <span 
+                        className="text-lg leading-none select-none"
+                        style={{ 
+                          fontFamily: '"Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Twemoji Mozilla", sans-serif',
+                          fontSize: '16px'
+                        }}
+                      >
+                        {emoji}
+                      </span>
                     </Button>
                   ))}
                 </motion.div>

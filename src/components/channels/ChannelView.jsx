@@ -495,35 +495,46 @@ export default function ChannelView({ channel, onBack }) {
     });
   };
 
+  // FIXED: Properly handle emoji reactions with unique emoji preservation
   const handleReaction = (messageId, emoji) => {
+    console.log('Channel handleReaction called with:', { messageId, emoji }); // Debug log
+    
     const updatedMessages = messages.map(message => {
       if (message.id === messageId) {
         const reactions = message.reactions || [];
-        const existingReaction = reactions.find(r => r.emoji === emoji);
         
-        if (existingReaction) {
-          if (existingReaction.users && existingReaction.users.includes(user.id)) {
-            existingReaction.users = existingReaction.users.filter(id => id !== user.id);
+        // Find existing reaction with the EXACT same emoji
+        const existingReactionIndex = reactions.findIndex(r => r.emoji === emoji);
+        
+        if (existingReactionIndex !== -1) {
+          // Reaction exists - toggle user participation
+          const existingReaction = reactions[existingReactionIndex];
+          const userIndex = existingReaction.users.indexOf(user.id);
+          
+          if (userIndex !== -1) {
+            // User already reacted - remove their reaction
+            existingReaction.users.splice(userIndex, 1);
             existingReaction.count = existingReaction.users.length;
+            
+            // If no users left, remove the entire reaction
             if (existingReaction.count === 0) {
-              return {
-                ...message,
-                reactions: reactions.filter(r => r.emoji !== emoji)
-              };
+              reactions.splice(existingReactionIndex, 1);
             }
           } else {
-            existingReaction.users = existingReaction.users || [];
+            // User hasn't reacted - add their reaction
             existingReaction.users.push(user.id);
             existingReaction.count = existingReaction.users.length;
           }
         } else {
+          // New reaction - create it
           reactions.push({
-            emoji,
+            emoji: emoji, // Preserve the exact emoji
             users: [user.id],
             count: 1
           });
         }
         
+        console.log('Updated reactions:', reactions); // Debug log
         return { ...message, reactions };
       }
       return message;
