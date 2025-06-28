@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -29,6 +28,7 @@ export default function ChannelView({ channel, onBack }) {
   const [notifications, setNotifications] = useState(true);
   const [channelMuted, setChannelMuted] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -50,6 +50,7 @@ export default function ChannelView({ channel, onBack }) {
         console.error('Error loading channel messages:', error);
       }
     } else {
+      // Create more demo messages to test scrolling
       const demoMessages = [
         {
           id: 1,
@@ -57,7 +58,7 @@ export default function ChannelView({ channel, onBack }) {
           senderName: 'Alex Chen',
           senderAvatar: '👨‍💻',
           content: `Welcome to #${channel.name}! 🎉`,
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
           type: 'text',
           isPinned: true
         },
@@ -67,7 +68,7 @@ export default function ChannelView({ channel, onBack }) {
           senderName: 'Sarah Wilson',
           senderAvatar: '👩‍🎨',
           content: 'Great to have everyone here! Looking forward to amazing discussions.',
-          timestamp: new Date(Date.now() - 1800000).toISOString(),
+          timestamp: new Date(Date.now() - 6600000).toISOString(),
           type: 'text'
         },
         {
@@ -76,12 +77,153 @@ export default function ChannelView({ channel, onBack }) {
           senderName: 'Mike Johnson',
           senderAvatar: '🧑‍🚀',
           content: 'This channel is going to be awesome! 🚀',
-          timestamp: new Date(Date.now() - 900000).toISOString(),
+          timestamp: new Date(Date.now() - 6000000).toISOString(),
           type: 'text',
           reactions: [
             { emoji: '🚀', users: ['demo-user-1', 'demo-user-2'], count: 2 },
             { emoji: '👍', users: ['demo-user-1'], count: 1 }
           ]
+        },
+        {
+          id: 4,
+          senderId: 'demo-user-4',
+          senderName: 'Emma Davis',
+          senderAvatar: '👩‍💼',
+          content: 'Has anyone tried the new features yet? They look incredible!',
+          timestamp: new Date(Date.now() - 5400000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 5,
+          senderId: 'demo-user-5',
+          senderName: 'James Brown',
+          senderAvatar: '👨‍🔬',
+          content: 'I\'ve been testing them all week. The performance improvements are amazing! 📈',
+          timestamp: new Date(Date.now() - 4800000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '📈', users: ['demo-user-1', 'demo-user-3'], count: 2 }
+          ]
+        },
+        {
+          id: 6,
+          senderId: 'demo-user-6',
+          senderName: 'Lisa Wang',
+          senderAvatar: '👩‍🔬',
+          content: 'The documentation is really well written too. Makes it easy to get started.',
+          timestamp: new Date(Date.now() - 4200000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 7,
+          senderId: 'demo-user-1',
+          senderName: 'Alex Chen',
+          senderAvatar: '👨‍💻',
+          content: 'Thanks everyone! We put a lot of effort into making everything user-friendly.',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 8,
+          senderId: 'demo-user-7',
+          senderName: 'David Kim',
+          senderAvatar: '👨‍🎨',
+          content: 'The UI design is absolutely beautiful. Clean and modern! ✨',
+          timestamp: new Date(Date.now() - 3000000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '✨', users: ['demo-user-2', 'demo-user-4'], count: 2 }
+          ]
+        },
+        {
+          id: 9,
+          senderId: 'demo-user-8',
+          senderName: 'Rachel Green',
+          senderAvatar: '👩‍🚀',
+          content: 'I love how responsive everything is. Works perfectly on mobile too! 📱',
+          timestamp: new Date(Date.now() - 2400000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 10,
+          senderId: 'demo-user-9',
+          senderName: 'Tom Wilson',
+          senderAvatar: '👨‍🏫',
+          content: 'The security features are top-notch. End-to-end encryption gives me peace of mind. 🔒',
+          timestamp: new Date(Date.now() - 1800000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '🔒', users: ['demo-user-1', 'demo-user-5', 'demo-user-7'], count: 3 }
+          ]
+        },
+        {
+          id: 11,
+          senderId: 'demo-user-10',
+          senderName: 'Anna Martinez',
+          senderAvatar: '👩‍💻',
+          content: 'The voice messages feature is so convenient! Perfect for when I\'m on the go. 🎤',
+          timestamp: new Date(Date.now() - 1200000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 12,
+          senderId: 'demo-user-2',
+          senderName: 'Sarah Wilson',
+          senderAvatar: '👩‍🎨',
+          content: 'File sharing works seamlessly too. No more email attachments! 📎',
+          timestamp: new Date(Date.now() - 600000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 13,
+          senderId: 'demo-user-11',
+          senderName: 'Chris Taylor',
+          senderAvatar: '👨‍⚕️',
+          content: 'The auto-delete feature is brilliant for sensitive conversations. Privacy first! 🛡️',
+          timestamp: new Date(Date.now() - 300000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '🛡️', users: ['demo-user-3', 'demo-user-9'], count: 2 }
+          ]
+        },
+        {
+          id: 14,
+          senderId: 'demo-user-12',
+          senderName: 'Maya Patel',
+          senderAvatar: '👩‍🔬',
+          content: 'I\'m impressed by how fast everything loads. Great optimization work! ⚡',
+          timestamp: new Date(Date.now() - 180000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 15,
+          senderId: 'demo-user-13',
+          senderName: 'Kevin Lee',
+          senderAvatar: '👨‍💼',
+          content: 'The channel system makes organizing conversations so much easier. Love it! 📋',
+          timestamp: new Date(Date.now() - 120000).toISOString(),
+          type: 'text'
+        },
+        {
+          id: 16,
+          senderId: 'demo-user-14',
+          senderName: 'Sophie Chen',
+          senderAvatar: '👩‍🎓',
+          content: 'Status updates are a nice touch. Keeps everyone connected! 💫',
+          timestamp: new Date(Date.now() - 60000).toISOString(),
+          type: 'text',
+          reactions: [
+            { emoji: '💫', users: ['demo-user-6', 'demo-user-8'], count: 2 }
+          ]
+        },
+        {
+          id: 17,
+          senderId: 'demo-user-15',
+          senderName: 'Ryan Murphy',
+          senderAvatar: '👨‍🎤',
+          content: 'Can\'t wait to see what new features are coming next! This is just the beginning. 🌟',
+          timestamp: new Date(Date.now() - 30000).toISOString(),
+          type: 'text'
         }
       ];
       setMessages(demoMessages);
@@ -111,7 +253,9 @@ export default function ChannelView({ channel, onBack }) {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const applyTextStyle = (style) => {
@@ -356,6 +500,11 @@ export default function ChannelView({ channel, onBack }) {
     { id: 'demo-user-1', name: 'Alex Chen', avatar: '👨‍💻', status: 'online', role: 'admin' },
     { id: 'demo-user-2', name: 'Sarah Wilson', avatar: '👩‍🎨', status: 'online', role: 'member' },
     { id: 'demo-user-3', name: 'Mike Johnson', avatar: '🧑‍🚀', status: 'away', role: 'member' },
+    { id: 'demo-user-4', name: 'Emma Davis', avatar: '👩‍💼', status: 'online', role: 'member' },
+    { id: 'demo-user-5', name: 'James Brown', avatar: '👨‍🔬', status: 'online', role: 'member' },
+    { id: 'demo-user-6', name: 'Lisa Wang', avatar: '👩‍🔬', status: 'away', role: 'member' },
+    { id: 'demo-user-7', name: 'David Kim', avatar: '👨‍🎨', status: 'online', role: 'member' },
+    { id: 'demo-user-8', name: 'Rachel Green', avatar: '👩‍🚀', status: 'online', role: 'member' },
     { id: user.id, name: user.username, avatar: user.avatar, status: 'online', role: 'member' }
   ];
 
@@ -402,7 +551,7 @@ export default function ChannelView({ channel, onBack }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-border bg-gradient-to-r from-accent/30 to-accent/10 backdrop-blur-sm p-3"
+            className="border-b border-border bg-gradient-to-r from-accent/30 to-accent/10 backdrop-blur-sm p-3 flex-shrink-0"
           >
             <div className="flex items-center gap-2 mb-2">
               <Pin className="w-4 h-4 text-primary" />
@@ -424,11 +573,18 @@ export default function ChannelView({ channel, onBack }) {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex">
+      <div className="flex-1 flex min-h-0">
         {/* Messages Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50">
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Messages Container with Proper Scrolling */}
+          <div 
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-background/50 custom-scrollbar"
+            style={{ 
+              scrollBehavior: 'smooth',
+              overflowAnchor: 'auto'
+            }}
+          >
             <AnimatePresence>
               {filteredMessages.map((message, index) => (
                 <motion.div
@@ -436,7 +592,7 @@ export default function ChannelView({ channel, onBack }) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.02 }}
                 >
                   <MessageBubble
                     message={message}
@@ -458,22 +614,25 @@ export default function ChannelView({ channel, onBack }) {
               <TypingIndicator users={typingUsers} />
             )}
             
-            <div ref={messagesEndRef} />
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} className="h-1" />
           </div>
 
-          {/* Message Input */}
-          <ChannelInput
-            newMessage={newMessage}
-            showEmojiPicker={showEmojiPicker}
-            channelName={channel.name}
-            onMessageChange={handleTyping}
-            onSendMessage={handleSendMessage}
-            onToggleEmojiPicker={() => setShowEmojiPicker(!showEmojiPicker)}
-            onEmojiSelect={handleEmojiSelect}
-            onFileUpload={() => setShowFileUpload(true)}
-            onVoiceRecord={() => setIsRecording(true)}
-            onApplyStyle={applyTextStyle}
-          />
+          {/* Message Input - Fixed at bottom */}
+          <div className="flex-shrink-0">
+            <ChannelInput
+              newMessage={newMessage}
+              showEmojiPicker={showEmojiPicker}
+              channelName={channel.name}
+              onMessageChange={handleTyping}
+              onSendMessage={handleSendMessage}
+              onToggleEmojiPicker={() => setShowEmojiPicker(!showEmojiPicker)}
+              onEmojiSelect={handleEmojiSelect}
+              onFileUpload={() => setShowFileUpload(true)}
+              onVoiceRecord={() => setIsRecording(true)}
+              onApplyStyle={applyTextStyle}
+            />
+          </div>
         </div>
 
         {/* Members Sidebar */}
